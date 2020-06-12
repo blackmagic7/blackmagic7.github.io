@@ -11,6 +11,7 @@ firebase.initializeApp(firebaseConfig);
 db = firebase.firestore();
 
 var answerSet = new Set();
+var guessMap = new Map();
 
 function deleteData(col){
 	db.collection(col).get().then(res => {
@@ -79,6 +80,7 @@ function listenData(){
 			if (change.type === "removed") {
                 $("#answerList").empty();
 				answerSet.clear();
+				guessMap.clear();
             }
         });
     });
@@ -121,17 +123,11 @@ function listenData(){
 	db.collection('players')
     .onSnapshot(function(snapshot) {
         snapshot.docChanges().forEach(function(change) {
-            if (change.type === "modified") {
-				var id = change.doc.id;
+			if (change.type === "added" || change.type === "modified") {
+				var name = change.doc.id;
 				var data = change.doc.data();
-				//console.log(id);
-				//console.log(data);
-				if(data.guess==2){
-					systemMsg(id+" got 2 answers correct!");
-				}else if(data.guess>2){
-					updateGuess(id, 0);
-					updateWinner(id);
-				}
+				guessMap.set(name, data.guess)
+				//console.log(guessMap);
             }
         });
     });
@@ -198,13 +194,13 @@ function updateWinner(name){
 		if (doc.exists) {
 			var data = doc.data();
 			var count = data.count;
-			systemMsg(name+" knows the Black Magic. Congrats!");
 			if(count==0){
 				setWinner("1", name);
 			}else if(count==1){
 				setWinner("2", name);
 			}else if(count==2){
 				setWinner("3", name);
+				systemMsg("The game is over. Please start another game.");
 			}else{
 				systemMsg("The game is over. Please start another game.");
 			}
@@ -277,7 +273,15 @@ function isGreen(ele, name){
 		div.removeClass('wrong');
 		div.addClass('correct');
 		updateAnswer(div.attr('id'), 'Correct');
-		updateGuess(name, 1);		
+		updateGuess(name, 1);
+		var guess = guessMap.get(name)+1;
+		if(guess==2){
+			systemMsg(name+" got 2 answers correct!");
+		}else if(guess>2){
+			updateWinner(name);
+			updateGuess(name, 0);
+			systemMsg(name+" knows the Black Magic!");
+		}
 	}
 }
 
@@ -360,6 +364,7 @@ $(document).ready(function(){
 				"Yes": function() {
 					$("#answerList").empty();
 					answerSet.clear();
+					guessMap.clear();
 					updateHost();
 					deleteData('answer');
 					setWinner("1","");
