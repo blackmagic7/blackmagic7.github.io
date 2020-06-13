@@ -242,18 +242,33 @@ function updateWinnerCount(num){
 }
 
 function checkIfHost(){
-	if($("#player").val()==$("#host").val()){
+	if($("#player").val()=='Guest'){
+		$("#clearChat").hide();
+		$("#tick").hide();
+		$("#cross").hide();
+		$("#answerBtn").show();
+		$("sup").hide();
+		$("#clearAnswers").hide();
+		$("#answerBox").prop("disabled", true);
+		$("#answerBtn").prop("disabled", true);
+	}else if($("#player").val()==$("#host").val()){
 		$("#clearChat").show();
 		$("#tick").show();
 		$("#cross").show();
 		$("#answerBtn").hide();
 		$("sup").show();
+		$("#clearAnswers").show();
+		$("#answerBox").prop("disabled", false);
+		$("#answerBtn").prop("disabled", false);
 	}else{
 		$("#clearChat").hide();
 		$("#tick").hide();
 		$("#cross").hide();
 		$("#answerBtn").show();
 		$("sup").hide();
+		$("#clearAnswers").show();
+		$("#answerBox").prop("disabled", false);
+		$("#answerBtn").prop("disabled", false);
 	}
 }
 
